@@ -1,5 +1,5 @@
 dataset_type: "ImageRecon" # [tiny_nerf, custom, blender, ImageRecon]
-dataset_path: "/root/NeRF_from_scratch/data/megapixel_tokyo.jpg" # 6144 x 2324 x 3 = 42,835,968
+dataset_path: "data/megapixel_tokyo.jpg" # 6144 x 2324 x 3 = 42,835,968
 ckpt_path: "checkpoints/img_recon_ngp_checkpoint.pt"
 
 # ngp parameters
