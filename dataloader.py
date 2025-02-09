@@ -131,6 +131,23 @@ class BlenderDataloader(BaseDataloader):
             K = utils.intrinsic_matrix(self.focal, self.focal, self.W / 2, self.H / 2)
             self.Ks[s] = K.unsqueeze(0).repeat(self.N[s], 1, 1)
 
+class ImageReconDataloader(BaseDataloader):
+    def __init__(self, image_path: str, scale:float=1):
+        super().__init__()
+
+        image = imageio.imread(image_path)
+        H, W = image.shape[:2]
+        focal = W / 2
+        pose = np.eye(4)
+        pose[2,3] = -1 # set camera at focal length distance
+        for s in ['train', 'val', 'test']:
+            self.images[s] = np.array([image[...,:3]]).astype(np.float32) / 255.0
+            self.c2w[s] = np.array([pose]).astype(np.float32)
+            self.N[s] = 1
+            self.H, self.W = H, W
+            self.focal = focal
+            K = utils.intrinsic_matrix(self.focal, self.focal, self.W / 2, self.H / 2)
+            self.Ks[s] = K.unsqueeze(0).repeat(self.N[s], 1, 1)
 
 class RaysData:
     def __init__(self, images: torch.Tensor, poses: torch.Tensor, Ks: torch.Tensor):
@@ -168,6 +185,7 @@ def get_dataloader(type: str, data_path: str) -> BaseDataloader:
         "tiny_nerf": TinyNerfDataloader,
         "custom": CustomDataloader,
         "blender": BlenderDataloader,
+        "ImageRecon": ImageReconDataloader,
     }
     if type not in loaders:
         raise ValueError(f"Invalid dataloader type: {type}")
@@ -178,8 +196,8 @@ if __name__ == "__main__":
     split_type = "train"
     # dataloader = get_dataloader("custom", "data/lego_100x100.npz")
     # dataloader = get_dataloader("tiny_nerf", "data/lego_200x200.npz")
-    dataloader = get_dataloader("blender", "data/lego")
-    
+    # dataloader = get_dataloader("blender", "data/lego")
+    dataloader = get_dataloader("ImageRecon", "data/lego/train/r_2.png")
     print(f"number of {split_type} images: {dataloader.N[split_type]}")
     for i in range(dataloader.N[split_type])[:3]:
         dataloader.show_image(index=i, stype=split_type)
