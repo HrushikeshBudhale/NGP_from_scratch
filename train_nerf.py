@@ -5,7 +5,7 @@ from tqdm import tqdm
 from dataloader import get_dataloader, RaysData, BaseDataloader
 from ray_sampling import RaySampler
 from renderer import Renderer
-from model import Nerf
+from model import NGP
 import utils
 
 
@@ -32,6 +32,9 @@ def train_nerf(model: dict, dataloader: BaseDataloader, optimizer, criterion, co
         optimizer.step()
         pbar.set_description(f"Loss: {loss.item():.4f}")
         pbar.update(1)
+
+        if epoch % 16 == 0:
+           model['nerf'].update_occupancy(random_sampling=(epoch >= 256)) 
 
         if epoch % conf["val_interval"] == 0 or epoch == conf["epochs"] - 1:
             model['nerf'].eval()
@@ -69,8 +72,12 @@ def main():
     conf = utils.load_yaml("conf.yaml")
     dataloader = get_dataloader(conf["dataset_type"], conf["dataset_path"])
     
-    model = {'nerf':Nerf(config=conf, device=device)}
-    optimizer = torch.optim.Adam(model["nerf"].parameters(), lr=conf['lr'])
+    model = {'nerf':NGP(config=conf, device=device)}
+    optimizer = torch.optim.Adam(
+        [{"params": model['nerf'].lookup_tables.parameters(), "lr": conf["lr"], "betas": (0.9, 0.99), "eps": 1e-15, "weight_decay": 0.},
+         {"params": model['nerf'].density_MLP.parameters()  , "lr": conf["lr"], "betas": (0.9, 0.99), "eps": 1e-15, "weight_decay": 1e-6},
+         {"params": model['nerf'].color_MLP.parameters()    , "lr": conf["lr"], "betas": (0.9, 0.99), "eps": 1e-15, "weight_decay": 1e-6}])
+
     criterion = torch.nn.MSELoss()
     train_nerf(model, dataloader, optimizer, criterion, conf)
 
