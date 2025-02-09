@@ -53,7 +53,7 @@ class NGP(nn.Module):
         mask = torch.all(x > 0, dim=-1) & torch.all(x < 1, dim=-1)
         # position to indexes
         indexes = torch.floor(x.clip(0., 0.99) * self.s_res).to(torch.int64)
-        mask &= self.occupancy_mask[*indexes.T]
+        mask &= self.occupancy_mask[tuple(indexes.T)]
         valid_point_indexes = torch.argwhere(mask).reshape(-1)
         return valid_point_indexes                                                                  # (Npts,)
     
@@ -72,7 +72,7 @@ class NGP(nn.Module):
         log_sigma = self.density_MLP(self.get_features(noisy_positions / self.s_res))               # (M, 16)
         densities = torch.exp(log_sigma[:, 0])                                                      # (M, 1)
         # update grids
-        self.occupancy_grid[*indexes.T] = torch.max(self.occupancy_grid[*indexes.T], densities)     # (M, 1)
+        self.occupancy_grid[tuple(indexes.T)] = torch.max(self.occupancy_grid[tuple(indexes.T)], densities)     # (M, 1)
         self.occupancy_mask = self.occupancy_grid > self.sigma_thresh
 
     def positional_encoding(self, x: torch.Tensor) -> torch.Tensor:
