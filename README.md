@@ -1,4 +1,4 @@
-# NeRF_from_scratch
+# NGP_from_scratch
 
 This is a pytorch implementation of paper [Instant Neural Graphics Primitives with a Multiresolution Hash Encoding](https://arxiv.org/abs/2201.05989).
 
@@ -8,16 +8,16 @@ The codebase is intentionally simplified to facilitate better understanding of t
 
 In fact, if you are coming from my previous repo [NeRF_from_scratch](https://github.com/HrushikeshBudhale/NeRF_from_scratch), you will see that this implementation mainly changes just the model.py without changing any ray marching or rendering or training loop. (Try git diff with initial commit)
 
-### The most elegant part of this pytorch implementation is that to make the model work for 2D or 3D demo, you only need to set value of `d` in `conf.yaml` to either 2 or 3 and all functions behave exactly the same.
+#### The elegant part about this pytorch implementation is that to make the model work for 2D or 3D demo, you only need to set value of `d` in `conf.yaml` to either 2 or 3 and all functions behave exactly the same.
 
-If you found this repo useful, please give it a star! ⭐️
+If you found this repo useful, please leave a star! ⭐️
 
 ## Features
 
-- Multiresolution hash encoding
-- Accelerated ray marching
-- Early stopping
-- (2D) image and (3D) scene reconstruction support
+- **Multiresolution hash encoding**
+- **Accelerated ray marching**
+- **Early stopping**
+- **(2D) image and (3D) scene reconstruction support**
 - SDF reconstruction support (in progress)
 - Exponential stepping (to be implemented)
 
